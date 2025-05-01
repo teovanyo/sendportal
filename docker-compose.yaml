@@ -5,7 +5,7 @@ services:
     image: laravelsail/php82-composer:latest
     container_name: sendportal_app
     ports:
-      - "80:80"
+      - "8080:80"
     volumes:
       - ./:/var/www/html
     working_dir: /var/www/html
