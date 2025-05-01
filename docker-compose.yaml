@@ -1,0 +1,37 @@
+version: '3.7'
+
+services:
+  sendportal:
+    image: mettle/sendportal:latest
+    container_name: sendportal
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    environment:
+      APP_KEY: ${APP_KEY}
+      APP_NAME: SendPortal
+      APP_ENV: production
+      APP_DEBUG: false
+      APP_URL: https://sendportal.stealthagents.us
+
+      DB_CONNECTION: mysql
+      DB_HOST: ${DB_HOST}
+      DB_PORT: 3306
+      DB_DATABASE: ${DB_DATABASE}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+
+      MAIL_MAILER: smtp
+      MAIL_HOST: ${MAIL_HOST}
+      MAIL_PORT: 587
+      MAIL_USERNAME: ${MAIL_USERNAME}
+      MAIL_PASSWORD: ${MAIL_PASSWORD}
+      MAIL_ENCRYPTION: tls
+      MAIL_FROM_ADDRESS: ${MAIL_FROM_ADDRESS}
+      MAIL_FROM_NAME: SendPortal
+
+    volumes:
+      - sendportal_storage:/var/www/html/storage
+
+volumes:
+  sendportal_storage:
