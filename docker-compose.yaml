@@ -1,37 +1,46 @@
-version: '3.7'
+version: '3.8'
 
 services:
-  sendportal:
-    image: mettle/sendportal:latest
-    container_name: sendportal
-    restart: unless-stopped
+  app:
+    image: laravelsail/php82-composer:latest
+    container_name: sendportal_app
     ports:
       - "80:80"
-    environment:
-      APP_KEY: ${APP_KEY}
-      APP_NAME: SendPortal
-      APP_ENV: production
-      APP_DEBUG: false
-      APP_URL: https://sendportal.stealthagents.us
-
-      DB_CONNECTION: mysql
-      DB_HOST: ${DB_HOST}
-      DB_PORT: 3306
-      DB_DATABASE: ${DB_DATABASE}
-      DB_USERNAME: ${DB_USERNAME}
-      DB_PASSWORD: ${DB_PASSWORD}
-
-      MAIL_MAILER: smtp
-      MAIL_HOST: ${MAIL_HOST}
-      MAIL_PORT: 587
-      MAIL_USERNAME: ${MAIL_USERNAME}
-      MAIL_PASSWORD: ${MAIL_PASSWORD}
-      MAIL_ENCRYPTION: tls
-      MAIL_FROM_ADDRESS: ${MAIL_FROM_ADDRESS}
-      MAIL_FROM_NAME: SendPortal
-
     volumes:
-      - sendportal_storage:/var/www/html/storage
+      - ./:/var/www/html
+    working_dir: /var/www/html
+    depends_on:
+      - mysql
+    environment:
+      SERVICE_NAME: app
+      DB_CONNECTION: mysql
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_DATABASE: sendportal
+      DB_USERNAME: sendportal_user
+      DB_PASSWORD: sendportal_pass
+    command: >
+      sh -c "
+        composer install &&
+        php artisan key:generate &&
+        php artisan migrate --force &&
+        php artisan db:seed --force &&
+        php artisan serve --host=0.0.0.0 --port=80
+      "
+
+  mysql:
+    image: mysql:8.0
+    container_name: sendportal_db
+    restart: always
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_DATABASE: sendportal
+      MYSQL_USER: sendportal_user
+      MYSQL_PASSWORD: sendportal_pass
+      MYSQL_ROOT_PASSWORD: rootpassword
+    volumes:
+      - db_data:/var/lib/mysql
 
 volumes:
-  sendportal_storage:
+  db_data:
